@@ -25,20 +25,13 @@ public class ThreeDimensionCashStack : MonoBehaviour
     public void StackObj()
     {
         if (!objPool.TryDequeue(out Transform objTf)) return;
-        
+
         Vector3 stackPos = GetAvailableStackPosition();
+        _stackedObjects.Push(objTf);
         objTf.SetParent(stackParentObj.transform, true);
         objTf.gameObject.SetActive(true);
         objTf.position = stackPos;
     }
-
-
-    public void ReturnObjToPool(Transform tf)
-    {
-        tf.gameObject.SetActive(false);
-        objPool.Enqueue(tf);
-    }
-
 
     private Vector3 GetAvailableStackPosition()
     {
@@ -54,13 +47,27 @@ public class ThreeDimensionCashStack : MonoBehaviour
         return Vector3.zero;
     }
 
-    public void SetEveryPositionAvailable()
+    #region Pooling
+
+    private void GenerateCashPool()
     {
-        foreach (var stackPosition in stackPositions)
+        for (int i = 0; i < maxStackedObjectCount.x * maxStackedObjectCount.y * maxStackedObjectCount.z; i++)
         {
-            stackPosition.isOccupied = false;
+            Transform cashObj = Instantiate(obj.transform);
+            cashObj.gameObject.SetActive(false);
+            objPool.Enqueue(cashObj);
         }
     }
+
+    public void ReturnObjToPool(Transform tf)
+    {
+        tf.gameObject.SetActive(false);
+        objPool.Enqueue(tf);
+    }
+
+    #endregion
+
+    #region Preperation
 
     private void GeneratePositions()
     {
@@ -78,15 +85,8 @@ public class ThreeDimensionCashStack : MonoBehaviour
         }
     }
 
-    private void GenerateCashPool()
-    {
-        for (int i = 0; i < maxStackedObjectCount.x * maxStackedObjectCount.y * maxStackedObjectCount.z; i++)
-        {
-            Transform cashObj = Instantiate(obj.transform);
-            cashObj.gameObject.SetActive(false);
-            objPool.Enqueue(cashObj);
-        }
-    }
+    #endregion
+    
 
     private class StackPosition
     {
